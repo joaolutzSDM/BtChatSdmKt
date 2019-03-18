@@ -17,6 +17,7 @@ import android.os.Handler
 import android.os.Message
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.PermissionChecker
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -72,6 +73,37 @@ class  MainActivity : AppCompatActivity() {
                    ActivityCompat.requestPermissions(this,arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION),REQUER_PERMISSOES_LOCALIZACAO)
                }
         }
+
+        chooseAppMode()
+    }
+
+    private fun chooseAppMode() {
+        with(AlertDialog.Builder(this)) {
+            //setTitle("Escolha o modo de execução do App")
+            setItems(R.array.modos_app) { dialog, which -> trataSelecaoModoApp(dialog, which)}
+            create()
+            show()
+        }
+    }
+
+    private fun trataSelecaoModoApp(dialog: DialogInterface?, which: Int) {
+        //Tratar a seleção do modo do App
+        when (which) {
+            0 -> { // Modo Cliente
+                toast("Configurando modo cliente")
+                // (Re)Inicializando a Lista de dispositivos encontrados
+                listaBtsEncontrados = mutableListOf()
+                registraReceiver()
+                adaptadorBt?.startDiscovery()
+                exibirAguardeDialog("Procurando dispositivos Bluetooth", 0)
+            }
+            1 -> { // Modo Servidor
+                toast("Configurando modo servidor")
+                val descobertaIntent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
+                descobertaIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,TEMPO_DESCOBERTA_SERVICO_BLUETOOTH)
+                startActivityForResult(descobertaIntent,ATIVA_DESCOBERTA_BLUETOOTH)
+            }
+        }
     }
 
     private fun pegandoAdaptadorBt() {
@@ -121,35 +153,15 @@ class  MainActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_modo_aplicativo,menu)
-        return true
+        return false
+//        Removendo o menu
+//        menuInflater.inflate(R.menu.menu_modo_aplicativo,menu)
+//        return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         var retorno = false
-        when (item?.itemId) {
-            R.id.modoClienteMenuItem -> {
-                toast("Configurando modo cliente")
 
-                // (Re)Inicializando a Lista de dispositivos encontrados
-                listaBtsEncontrados = mutableListOf()
-
-                registraReceiver()
-
-                adaptadorBt?.startDiscovery()
-
-                exibirAguardeDialog("Procurando dispositivos Bluetooth", 0)
-                retorno = true
-            }
-            R.id.modoServidorMenuItem -> {
-                toast("Configurando modo servidor")
-
-                val descobertaIntent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
-                descobertaIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,TEMPO_DESCOBERTA_SERVICO_BLUETOOTH)
-                startActivityForResult(descobertaIntent,ATIVA_DESCOBERTA_BLUETOOTH)
-                retorno = true
-            }
-        }
         return retorno
     }
 
