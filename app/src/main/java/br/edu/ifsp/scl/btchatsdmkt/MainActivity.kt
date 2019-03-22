@@ -22,6 +22,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.Toast
 import br.edu.ifsp.scl.btchatsdmkt.BluetoothSingleton.Constantes.ATIVA_BLUETOOTH
 import br.edu.ifsp.scl.btchatsdmkt.BluetoothSingleton.Constantes.ATIVA_DESCOBERTA_BLUETOOTH
@@ -55,6 +56,8 @@ class  MainActivity : AppCompatActivity() {
     // Dialog para aguardar conexões e busca
     private var aguardeDialog: ProgressDialog? = null
 
+    private var configName: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -75,6 +78,18 @@ class  MainActivity : AppCompatActivity() {
         }
 
         chooseAppMode()
+        configName()
+    }
+
+    private fun configName() {
+        val input: EditText = EditText(this)
+        with(AlertDialog.Builder(this)) {
+            setTitle("Olá qual seu nome?")
+            setView(input)
+            setNeutralButton("Ok") { dialog, which -> configName = input.text.toString() }
+            create()
+            show()
+        }
     }
 
     private fun chooseAppMode() {
@@ -261,7 +276,7 @@ class  MainActivity : AppCompatActivity() {
 
     fun enviarMensagem(view: View) {
         if (view == enviarBt) {
-            val mensagem = mensagemEditText.text.toString()
+            val mensagem = configName + ": " + mensagemEditText.text.toString()
             mensagemEditText.setText("")
 
             try {
